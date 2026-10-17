@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "appName": "TradeShark",
+  "exportedAt": "2026-10-17T09:28:28.804Z",
+  "mode": "file",
+  "totalDocuments": 8,
+  "collections": {
+    "users": [],
+    "admins": [
+      {
+        "id": "ADM-MVC720EWDUXDLJ6B",
+        "username": "admin",
+        "role": "Super-Admin",
+        "name": "Administrator",
+        "email": "support@localhost",
+        "passwordHash": "$2b$10$xOUTdBMcETOi84vsJD5ncuUtYQzURGiQN7J9rUsH138ouA/3DfwbC",
+        "createdAt": "2026-10-17T09:28:27.933Z"
+      }
+    ],
+    "transactions": [],
+    "auditLogs": [],
+    "positions": [],
+    "emails": [],
+    "copies": [],
+    "tokens": [],
+    "submissions": [],
+    "subscribers": [],
+    "settings": [
+      {
+        "id": "system",
+        "jwtSecret": "a23069ad46181b6711377b8f96e2ae5c61f90d6300c293c55fa98406df608fb56add06a21a09a2129028350bda77ffce",
+        "createdAt": "2026-10-17T09:28:27.798Z"
+      }
+    ],
+    "otps": [],
+    "investors": [
+      {
+        "id": "1",
+        "name": "Rhys Adams",
+        "handle": "@radams_wealth",
+        "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+        "role": "Elite Pro Investor",
+        "bio": "Long term copy recommended. I invest for the long term, often buying out of favour stocks with a strong dividend. If you copy for the short term, you may be exposed to volatility.",
+        "return24M": 45.41,
+        "baseCopiers": 2372,
+        "riskScore": 4,
+        "topHoldings": [
+          "MSFT",
+          "BRK.B",
+          "JNJ",
+          "AAPL"
+        ],
+        "dailyTarget": null,
+        "active": true,
+        "perfIndex": 1,
+        "sortOrder": 0,
+        "createdAt": "2026-10-17T09:28:27.933Z"
+      },
+      {
+        "id": "2",
+        "name": "Agnieszka Nowak",
+        "handle": "@anowak_capital",
+        "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop&q=80",
+        "role": "Investment Management Director",
+        "bio": "Investment Management Director with +9 years experience managing institutional equity strategies with disciplined risk-adjusted compounding.",
+        "return24M": 45.98,
+        "baseCopiers": 508,
+        "riskScore": 3,
+        "topHoldings": [
+          "NVDA",
+          "ASML",
+          "TSMC",
+          "GOOGL"
+        ],
+        "dailyTarget": null,
+        "active": true,
+        "perfIndex": 1,
+        "sortOrder": 1,
+        "createdAt": "2026-10-17T09:28:27.933Z"
+      },
+      {
+        "id": "3",
+        "name": "Stefan Uleia",
+        "handle": "@stefan_tech",
+        "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
+        "role": "Tech & Macro Strategist",
+        "bio": "Passionate about markets, AI innovation, and semiconductor revolutions. Committed to growing wealth with discipline, transparency, and a clear long-term vision.",
+        "return24M": 64.73,
+        "baseCopiers": 1417,
+        "riskScore": 5,
+        "topHoldings": [
+          "BTC",
+          "NVDA",
+          "ARM",
+          "META"
+        ],
+        "dailyTarget": null,
+        "active": true,
+        "perfIndex": 1,
+        "sortOrder": 2,
+        "createdAt": "2026-10-17T09:28:27.933Z"
+      },
+      {
+        "id": "4",
+        "name": "Thomas Roddy",
+        "handle": "@troddy_quant",
+        "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80",
+        "role": "Multi-Factor Portfolio Lead",
+        "bio": "I diversify across industries, geographies, and a small hedge in crypto. Unlike basic ETFs, my quantitative strategy incorporates three core factor models.",
+        "return24M": 47,
+        "baseCopiers": 844,
+        "riskScore": 4,
+        "topHoldings": [
+          "VOO",
+          "AMZN",
+          "COST",
+          "ETH"
+        ],
+        "dailyTarget": null,
+        "active": true,
+        "perfIndex": 1,
+        "sortOrder": 3,
+        "createdAt": "2026-10-17T09:28:27.933Z"
+      },
+      {
+        "id": "5",
+        "name": "Catalina Norena",
+        "handle": "@catalina_invest",
+        "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80",
+        "role": "Former S&P 500 Treasury Analyst",
+        "bio": "Professional corporate finance background in Fortune 500 treasuries. High emphasis on capital preservation, defensive cash flow, and steady dividend reinvestment.",
+        "return24M": 16.19,
+        "baseCopiers": 1459,
+        "riskScore": 2,
+        "topHoldings": [
+          "PG",
+          "KO",
+          "PEP",
+          "GLD"
+        ],
+        "dailyTarget": null,
+        "active": true,
+        "perfIndex": 1,
+        "sortOrder": 4,
+        "createdAt": "2026-10-17T09:28:27.933Z"
+      },
+      {
+        "id": "6",
+        "name": "Akansha Trivedi",
+        "handle": "@akatrivedi_alpha",
+        "avatarUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80",
+        "role": "Quantitative Risk Analyst",
+        "bio": "Disciplined, data-driven approach aimed at steady compounding while keeping portfolio risk score < 5 and Sharpe ratio strictly ≥ 1.0.",
+        "return24M": 57.61,
+        "baseCopiers": 479,
+        "riskScore": 4,
+        "topHoldings": [
+          "QQQ",
+          "MSFT",
+          "LLY",
+          "AVGO"
+        ],
+        "dailyTarget": null,
+        "active": true,
+        "perfIndex": 1,
+        "sortOrder": 5,
+        "createdAt": "2026-10-17T09:28:27.933Z"
+      }
+    ]
+  }
+}
