@@ -177,9 +177,7 @@ export const Footer: React.FC<FooterProps> = ({
               <p>
                 <strong>High Risk Investment Warning:</strong> CFDs are complex instruments and come with a high risk of losing money rapidly due to leverage. <strong>A significant proportion of retail investor accounts lose money</strong> when trading CFDs. You should consider whether you understand how CFDs work and whether you can afford to take the high risk of losing your money.
               </p>
-              <p>
-                Cryptoasset investing is highly volatile and unregulated in some jurisdictions. No consumer protection. Tax on profits may apply. Past performance is not an indication of future results. Trading history presented is less than 5 complete years and may not suffice as basis for investment decisions.
-              </p>
+
             </div>
           </div>
 
