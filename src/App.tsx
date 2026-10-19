@@ -9,7 +9,7 @@ import { Hero } from './components/Hero';
 import { TrustBar } from './components/TrustBar';
 import { PricingSection } from './components/PricingSection';
 import { ProductRange } from './components/ProductRange';
-import { PopularInvestors } from './components/PopularInvestors';
+
 import { AiProducts } from './components/AiProducts';
 import { TrustSafety } from './components/TrustSafety';
 import { FinalCta } from './components/FinalCta';
@@ -34,7 +34,7 @@ import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage, NotFoundPage } 
 
 import { Instrument, PopularInvestor } from './types';
 import { PAGE_BY_SLUG, LEGACY_LINKS, CtaAction } from './data/pages';
-import { ArrowUp, ArrowRight } from 'lucide-react';
+import { ArrowUp, ArrowRight, LayoutGrid, BarChart2, Zap, Briefcase, Bot } from 'lucide-react';
 import { useBrokerage } from './context/BrokerageContext';
 import { useLocation, navigate, scrollToHash } from './lib/router';
 import { errMsg } from './lib/api';
@@ -134,7 +134,6 @@ export default function App() {
         <TrustBar />
         <PricingSection onLearnMore={() => navigate('/fees')} />
         <ProductRange onSelectInstrument={(inst) => setTradeInstrument(inst)} onStartInvesting={() => handleCta('signup')} />
-        <PopularInvestors onCopyInvestor={(inv) => setCopyInvestor(inv)} onExploreAll={() => navigate('/popular-investors')} />
         <AiProducts onOpenAiChat={() => setIsAiChatOpen(true)} />
         <TrustSafety />
         <FinalCta onSignUp={() => handleCta('signup')} />
@@ -142,8 +141,6 @@ export default function App() {
     );
   } else if (path === '/markets' || path.startsWith('/markets/')) {
     body = <MarketsPage category={path.split('/')[2]} onTrade={setTradeInstrument} />;
-  } else if (path === '/popular-investors') {
-    body = <InvestorsPage onCopy={setCopyInvestor} />;
   } else if (path === '/forgot-password') {
     body = <ForgotPasswordPage />;
   } else if (path === '/reset-password') {
@@ -169,12 +166,12 @@ export default function App() {
         currentUser={currentUser}
       />
 
-      <main className="flex-1">{body}</main>
+      <main className="flex-1 pb-0 md:pb-0">{body}</main>
 
       <Footer onOpenUserDashboard={() => openUserDashboard()} />
 
-      {/* Floating AI Assistant Trigger Button */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+      {/* Desktop Floating AI Button */}
+      <div className="hidden md:flex fixed bottom-6 right-6 z-40 flex-col gap-3">
         {showScrollTop && (
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -193,22 +190,72 @@ export default function App() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#15170f] opacity-40"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#15170f]"></span>
           </span>
-          <span className="text-xs sm:text-sm font-bold">Ask Shark AI</span>
+          <span className="text-sm font-bold">Ask Shark AI</span>
         </button>
       </div>
 
-      {/* Mobile Sticky CTA Bar */}
-      {showMobileStickyCta && !currentUser && (
-        <div className="md:hidden fixed bottom-0 inset-x-0 z-30 p-3 bg-[#15170f]/95 border-t border-white/10 backdrop-blur-md animate-slideUp">
+      {/* ── Mobile App Bottom Navigation Bar ── */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50" style={{background: 'rgba(15,17,10,0.97)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.08)'}}>
+        {/* Safe area spacer for iPhone home indicator */}
+        <div className="flex items-center justify-around px-2 pt-2 pb-[env(safe-area-inset-bottom,8px)]">
+
+          {/* Home */}
           <button
-            onClick={() => openAuth('signup')}
-            className="w-full py-3.5 rounded-full bg-[#6dff8a] text-[#15170f] font-bold text-sm shadow-[0_0_20px_rgba(109,255,138,0.3)] flex items-center justify-center gap-2"
+            onClick={() => { window.scrollTo({top:0,behavior:'smooth'}); }}
+            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90"
+            style={{color: path==='/' ? '#6dff8a' : 'rgba(255,255,255,0.45)'}}
           >
-            <span>Start Investing with {config.appName}</span>
-            <ArrowRight className="w-4 h-4" />
+            <LayoutGrid className="w-5 h-5" />
+            <span className="text-[10px] font-semibold tracking-wide">Home</span>
           </button>
+
+          {/* Markets */}
+          <button
+            onClick={() => { window.location.href='/markets'; }}
+            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90"
+            style={{color: path.startsWith('/markets') ? '#6dff8a' : 'rgba(255,255,255,0.45)'}}
+          >
+            <BarChart2 className="w-5 h-5" />
+            <span className="text-[10px] font-semibold tracking-wide">Markets</span>
+          </button>
+
+          {/* Trade — centre CTA */}
+          <button
+            onClick={() => currentUser ? openUserDashboard('trade') : openAuth('signup')}
+            className="flex flex-col items-center gap-0.5 -mt-5 px-4 py-2 rounded-2xl shadow-[0_0_20px_rgba(109,255,138,0.5)] active:scale-90 transition-all"
+            style={{background: 'linear-gradient(135deg,#6dff8a,#3dd68c)', color: '#0f110a'}}
+          >
+            <Zap className="w-6 h-6" fill="currentColor" />
+            <span className="text-[10px] font-bold tracking-wide">Trade</span>
+          </button>
+
+          {/* Portfolio */}
+          <button
+            onClick={() => currentUser ? openUserDashboard('portfolio') : openAuth('login')}
+            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90"
+            style={{color: isUserPortal ? '#6dff8a' : 'rgba(255,255,255,0.45)'}}
+          >
+            <Briefcase className="w-5 h-5" />
+            <span className="text-[10px] font-semibold tracking-wide">{currentUser ? 'Portfolio' : 'Account'}</span>
+          </button>
+
+          {/* AI */}
+          <button
+            onClick={() => setIsAiChatOpen(true)}
+            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90"
+            style={{color: isAiChatOpen ? '#6dff8a' : 'rgba(255,255,255,0.45)'}}
+          >
+            <span className="relative flex">
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#6dff8a] animate-pulse"></span>
+              <Bot className="w-5 h-5" />
+            </span>
+            <span className="text-[10px] font-semibold tracking-wide">Shark AI</span>
+          </button>
+
         </div>
-      )}
+      </nav>
+      {/* Bottom padding so content isn't hidden behind mobile nav */}
+      <div className="md:hidden h-20" />
 
       <CookieBanner />
 
