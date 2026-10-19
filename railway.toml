@@ -1,0 +1,46 @@
+[build]
+watchPatterns = ["src/**", "server/**", "public/**", "index.html", "package.json", "vite.config.ts"]
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 180
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+
+[environments.production.variables]
+NODE_ENV             = "production"
+APP_NAME             = "TradeShark"
+COMPANY_LEGAL_NAME   = "TradeShark Ltd"
+
+# Admin credentials
+ADMIN_USERNAME       = "admin"
+ADMIN_PASSWORD       = "Shark@Admin2025!"
+ADMIN_EMAIL          = "admin@tradesharkltd.com"
+ADMIN_NAME           = "System Administrator"
+ADMIN_NOTIFY_EMAIL   = "admin@tradesharkltd.com"
+
+# Security
+JWT_SECRET           = "ts_j9K2mP8xQ4vL7nR1wY6uE3dA0bF5hG9c"
+
+# Session / OTP
+LOGIN_OTP            = "true"
+OTP_TTL_MINUTES      = "10"
+MAX_FAILED_LOGINS    = "5"
+LOCKOUT_MINUTES      = "15"
+
+# Platform settings
+SHOW_ADMIN_LINK      = "false"
+SEED_DEMO_DATA       = "false"
+ENABLE_DEMO_LOGINS   = "false"
+SIGNUP_BONUS         = "0"
+MIN_DEPOSIT          = "100"
+MIN_WITHDRAWAL       = "50"
+
+# Support contact
+SUPPORT_EMAIL        = "support@tradesharkltd.com"
+MAIL_FROM_NAME       = "TradeShark"
+MAIL_FROM_ADDRESS    = "noreply@tradesharkltd.com"
+MAIL_REPLY_TO        = "support@tradesharkltd.com"
+EMAIL_TRADE_CONFIRMATIONS = "true"
+EMAIL_LOGIN_ALERTS   = "false"

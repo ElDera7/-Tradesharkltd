@@ -17,12 +17,10 @@ import {
 
 interface FooterProps {
   onOpenUserDashboard?: () => void;
-  onOpenAdminPortal?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onOpenUserDashboard,
-  onOpenAdminPortal
 }) => {
   const { config } = useBrokerage();
   const socials = [
@@ -140,33 +138,6 @@ export const Footer: React.FC<FooterProps> = ({
               </ul>
             </div>
           ))}
-        </div>
-
-        {/* Direct Platform Access Strip */}
-        <div className="p-4 rounded-2xl bg-[#14170d] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#6dff8a] animate-pulse" />
-            <span className="font-bold text-white">Direct Terminal Access:</span>
-            <span className="text-white/60">Switch directly between Client Trading and Institutional Portals</span>
-          </div>
-          <div className="flex items-center gap-2.5">
-            {onOpenUserDashboard && (
-              <button
-                onClick={onOpenUserDashboard}
-                className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-white/10 text-xs"
-              >
-                <span>Client WebTrader Terminal</span>
-              </button>
-            )}
-            {onOpenAdminPortal && config.features.showAdminLink && (
-              <button
-                onClick={onOpenAdminPortal}
-                className="px-3.5 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-red-500/30 text-xs"
-              >
-                <span>Institutional Admin Portal</span>
-              </button>
-            )}
-          </div>
         </div>
 
         {/* Regulatory Disclosures and Risk Warnings */}

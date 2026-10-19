@@ -64,7 +64,7 @@ export const config = {
   dataDir: env('DATA_DIR', env('RAILWAY_VOLUME_MOUNT_PATH', './data')),
   seedDemoData: bool('SEED_DEMO_DATA', false),
   enableDemoLogins: bool('ENABLE_DEMO_LOGINS', false),
-  showAdminLink: bool('SHOW_ADMIN_LINK', true),
+  showAdminLink: bool('SHOW_ADMIN_LINK', false),
   requireEmailVerification: bool('REQUIRE_EMAIL_VERIFICATION', false),
   // Email one-time code on every client login (2-step sign-in). Set LOGIN_OTP=false to disable.
   loginOtp: bool('LOGIN_OTP', true),
