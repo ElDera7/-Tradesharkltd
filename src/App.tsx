@@ -9,7 +9,6 @@ import { Hero } from './components/Hero';
 import { TrustBar } from './components/TrustBar';
 import { PricingSection } from './components/PricingSection';
 import { ProductRange } from './components/ProductRange';
-
 import { AiProducts } from './components/AiProducts';
 import { TrustSafety } from './components/TrustSafety';
 import { FinalCta } from './components/FinalCta';
@@ -29,7 +28,6 @@ import { AdminPortalModal } from './components/AdminPortalModal';
 // Pages
 import { ContentPage } from './pages/ContentPage';
 import { MarketsPage } from './pages/MarketsPage';
-import { InvestorsPage } from './pages/InvestorsPage';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage, NotFoundPage } from './pages/AuthPages';
 
 import { Instrument, PopularInvestor } from './types';
