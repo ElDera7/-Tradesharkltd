@@ -28,6 +28,7 @@ import { AdminPortalModal } from './components/AdminPortalModal';
 // Pages
 import { ContentPage } from './pages/ContentPage';
 import { MarketsPage } from './pages/MarketsPage';
+import { PopularInvestorsPage } from './pages/PopularInvestorsPage';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage, NotFoundPage } from './pages/AuthPages';
 
 import { Instrument, PopularInvestor } from './types';
@@ -145,6 +146,8 @@ export default function App() {
     body = <ResetPasswordPage token={loc.search.get('token') || ''} setup={loc.search.get('setup') === '1'} onDone={() => openUserDashboard()} />;
   } else if (path === '/verify-email') {
     body = <VerifyEmailPage token={loc.search.get('token') || ''} />;
+  } else if (path === '/popular-investors') {
+    body = <PopularInvestorsPage onCopy={setCopyInvestor} />;
   } else if (PAGE_BY_SLUG[slug]) {
     body = <ContentPage page={PAGE_BY_SLUG[slug]} onAction={handleCta} />;
   } else if (LEGACY_LINKS[slug]) {
