@@ -159,13 +159,13 @@ export const ProductRange: React.FC<ProductRangeProps> = ({
             </div>
 
             <div className="pt-8 mt-8 border-t border-white/10">
-              <button
-                onClick={onStartInvesting}
+              <a
+                href={`/markets/${activeTab}`}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#6dff8a] text-[#15170f] font-bold hover:bg-[#5ce077] transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(109,255,138,0.25)]"
               >
                 <span>{currentTabInfo.ctaText}</span>
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </a>
             </div>
           </div>
 

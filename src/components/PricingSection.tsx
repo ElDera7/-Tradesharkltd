@@ -77,10 +77,14 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onLearnMore }) =
               </div>
 
               <div className="mt-8 pt-4 border-t border-white/5">
-                <span className="text-xs font-semibold text-[#6dff8a] flex items-center gap-1.5 group-hover:underline cursor-pointer">
+                <button
+                  type="button"
+                  onClick={onLearnMore}
+                  className="text-xs font-semibold text-[#6dff8a] flex items-center gap-1.5 group-hover:underline cursor-pointer"
+                >
                   <span>Explore asset specifications</span>
                   <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                </span>
+                </button>
               </div>
             </div>
           ))}

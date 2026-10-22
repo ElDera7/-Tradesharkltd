@@ -15,7 +15,8 @@ export const TradeModal: React.FC<TradeModalProps> = (props) => (props.instrumen
 
 const TradeModalInner: React.FC<TradeModalProps & { instrument: Instrument }> = ({ instrument: initial, onClose, onRequireAuth, onOpenPortal }) => {
   const { instruments, currentUser, openPosition } = useBrokerage();
-  const instrument = instruments.find(i => i.symbol === initial.symbol) || initial;
+  const [selectedSymbol, setSelectedSymbol] = useState(initial.symbol);
+  const instrument = instruments.find(i => i.symbol === selectedSymbol) || initial;
 
   const [tradeType, setTradeType] = useState<'BUY' | 'SELL'>('BUY');
   const [amount, setAmount] = useState(100);
@@ -46,7 +47,7 @@ const TradeModalInner: React.FC<TradeModalProps & { instrument: Instrument }> = 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
       <div 
         className="w-full max-w-md bg-[#181b12] border border-white/15 rounded-3xl shadow-2xl p-6 sm:p-7 relative text-left"
         onClick={(e) => e.stopPropagation()}
@@ -94,14 +95,24 @@ const TradeModalInner: React.FC<TradeModalProps & { instrument: Instrument }> = 
               >
                 {instrument.symbol.slice(0, 3)}
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold text-white">{instrument.symbol}</h3>
+                  <select
+                    value={instrument.symbol}
+                    onChange={(e) => setSelectedSymbol(e.target.value)}
+                    className="bg-black/50 border border-white/20 text-white font-bold text-lg rounded-xl px-2.5 py-1 focus:outline-none focus:border-[#6dff8a] cursor-pointer"
+                  >
+                    {instruments.map(i => (
+                      <option key={i.symbol} value={i.symbol} className="bg-[#181b12] text-white">
+                        {i.symbol} — {i.name}
+                      </option>
+                    ))}
+                  </select>
                   <span className="text-[10px] text-[#6dff8a] uppercase bg-[#6dff8a]/10 px-2 py-0.5 rounded font-bold">
                     {instrument.category}
                   </span>
                 </div>
-                <div className="text-xs text-[#a3a89e]">{instrument.name}</div>
+                <div className="text-xs text-[#a3a89e] truncate mt-0.5">{instrument.name}</div>
               </div>
             </div>
 

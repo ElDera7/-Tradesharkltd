@@ -146,7 +146,7 @@ export default function App() {
     body = <ResetPasswordPage token={loc.search.get('token') || ''} setup={loc.search.get('setup') === '1'} onDone={() => openUserDashboard()} />;
   } else if (path === '/verify-email') {
     body = <VerifyEmailPage token={loc.search.get('token') || ''} />;
-  } else if (path === '/popular-investors') {
+  } else if (path === '/popular-investors' || path === '/copytrader' || path === '/copy-trader' || path === '/copy-traders' || path === '/copy') {
     body = <PopularInvestorsPage onCopy={setCopyInvestor} />;
   } else if (PAGE_BY_SLUG[slug]) {
     body = <ContentPage page={PAGE_BY_SLUG[slug]} onAction={handleCta} />;
@@ -222,7 +222,7 @@ export default function App() {
 
           {/* Trade — centre CTA */}
           <button
-            onClick={() => currentUser ? openUserDashboard('trade') : openAuth('signup')}
+            onClick={() => currentUser ? openUserDashboard('markets') : openAuth('signup')}
             className="flex flex-col items-center gap-0.5 -mt-5 px-4 py-2 rounded-2xl shadow-[0_0_20px_rgba(109,255,138,0.5)] active:scale-90 transition-all"
             style={{background: 'linear-gradient(135deg,#6dff8a,#3dd68c)', color: '#0f110a'}}
           >
@@ -260,7 +260,27 @@ export default function App() {
 
       <CookieBanner />
 
-      {/* Modals */}
+      {/* Portals */}
+      {ready && (
+        <UserDashboardModal
+          isOpen={isUserPortal}
+          onClose={closePortal}
+          initialTab={loc.search.get('tab') || undefined}
+          onOpenTrade={handleOpenTradeForSymbol}
+          onCopyInvestor={(inv) => setCopyInvestor(inv)}
+        />
+      )}
+
+      {ready && (
+        <AdminPortalModal
+          isOpen={isAdminPortal}
+          initialTab={loc.search.get('tab') || undefined}
+          onClose={closePortal}
+          onSwitchToUserDashboard={() => openUserDashboard()}
+        />
+      )}
+
+      {/* Floating Overlays & Modals */}
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} onSelectInstrument={(inst) => setTradeInstrument(inst)} />
 
       <TradeModal
@@ -285,24 +305,6 @@ export default function App() {
       />
 
       <AiChatDrawer isOpen={isAiChatOpen} onClose={() => setIsAiChatOpen(false)} onOpenTrade={handleOpenTradeForSymbol} />
-
-      {ready && (
-        <UserDashboardModal
-          isOpen={isUserPortal}
-          onClose={closePortal}
-          initialTab={loc.search.get('tab') || undefined}
-          onOpenTrade={handleOpenTradeForSymbol}
-        />
-      )}
-
-      {ready && (
-        <AdminPortalModal
-          isOpen={isAdminPortal}
-          initialTab={loc.search.get('tab') || undefined}
-          onClose={closePortal}
-          onSwitchToUserDashboard={() => openUserDashboard()}
-        />
-      )}
 
     </div>
   );

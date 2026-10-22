@@ -87,6 +87,12 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
       group: 'PORTFOLIO & TRADING'
     },
     {
+      id: 'markets',
+      label: 'Live Markets & Screener',
+      icon: <TrendingUp className="w-4 h-4 text-[#6dff8a]" />,
+      group: 'PORTFOLIO & TRADING'
+    },
+    {
       id: 'copy',
       label: 'CopyTrader™ Portfolios',
       icon: <Users className="w-4 h-4" />,

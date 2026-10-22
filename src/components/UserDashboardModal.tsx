@@ -24,11 +24,12 @@ import {
   Copy,
   Check,
   ShieldAlert,
-  LogOut
+  LogOut,
+  Search
 } from 'lucide-react';
 import { TradeSharkLogo } from './TradeSharkLogo';
 import { useBrokerage } from '../context/BrokerageContext';
-import { FundingTransaction } from '../types';
+import { FundingTransaction, PopularInvestor } from '../types';
 import { UserSidebar, UserTab } from './UserPortal/UserSidebar';
 import { UserKycTab } from './UserPortal/UserKycTab';
 import { UserInboxTab } from './UserPortal/UserInboxTab';
@@ -40,6 +41,7 @@ interface UserDashboardModalProps {
   onClose: () => void;
   initialTab?: string;
   onOpenTrade: (symbol: string) => void;
+  onCopyInvestor?: (investor: PopularInvestor) => void;
   onOpenAdminPortal?: () => void;
 }
 
@@ -62,6 +64,7 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
   onClose,
   initialTab,
   onOpenTrade,
+  onCopyInvestor,
   onOpenAdminPortal
 }) => {
   const {
@@ -81,7 +84,9 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
     changePassword,
     updateProfile,
     resendVerification,
-    resetPractice
+    resetPractice,
+    instruments,
+    investors
   } = useBrokerage();
   const currentUser = maybeUser!;
 
@@ -108,6 +113,17 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
   const [withdrawMethod, setWithdrawMethod] = useState<FundingTransaction['method']>('Bank Wire');
   const [withdrawDestination, setWithdrawDestination] = useState('');
   const [withdrawNotice, setWithdrawNotice] = useState<string | null>(null);
+
+  // Market screener state
+  const [marketCategory, setMarketCategory] = useState<string>('all');
+  const [marketSearch, setMarketSearch] = useState<string>('');
+
+  const filteredInstruments = instruments.filter(i => 
+    (marketCategory === 'all' || i.category === marketCategory) &&
+    (!marketSearch.trim() || 
+      i.symbol.toLowerCase().includes(marketSearch.toLowerCase()) || 
+      i.name.toLowerCase().includes(marketSearch.toLowerCase()))
+  );
 
   const copiedInvestors = copies.filter(c => c.userId === currentUser.id);
 
@@ -458,8 +474,8 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
                   <Layers className="w-10 h-10 mx-auto text-white/30" />
                   <p className="text-sm">No open positions currently active for this account.</p>
                   <button
-                    onClick={() => onOpenTrade('BTC')}
-                    className="px-4 py-2 rounded-full bg-[#6dff8a] text-[#15170f] font-bold text-xs"
+                    onClick={() => setActiveTab('markets')}
+                    className="px-4 py-2 rounded-full bg-[#6dff8a] text-[#15170f] font-bold text-xs hover:bg-[#5ce077] transition-all transform hover:scale-105 active:scale-95"
                   >
                     Explore Markets
                   </button>
@@ -512,6 +528,126 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TAB: MARKETS & LIVE SCREENER */}
+          {activeTab === 'markets' && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <span>Institutional Execution Screener</span>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#6dff8a]/10 text-[#6dff8a] text-[10px] font-bold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#6dff8a] animate-pulse" />
+                      Live Feed
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[#a3a89e]">Real-time pricing, spreads and 1-click execution across global asset classes.</p>
+                </div>
+                <div className="relative w-full sm:w-64">
+                  <Search className="w-4 h-4 text-white/40 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search symbol or asset..."
+                    value={marketSearch}
+                    onChange={(e) => setMarketSearch(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#6dff8a]"
+                  />
+                </div>
+              </div>
+
+              {/* Category Filter Pills */}
+              <div className="flex flex-wrap gap-2 text-xs">
+                {(['all', 'stocks', 'crypto', 'currencies', 'commodities', 'etfs', 'indices'] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setMarketCategory(cat)}
+                    className={`px-3.5 py-1.5 rounded-xl font-semibold capitalize transition-all ${
+                      marketCategory === cat
+                        ? 'bg-[#6dff8a] text-[#15170f] font-bold shadow-sm'
+                        : 'bg-white/5 text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {cat === 'all' ? 'All Markets' : cat}
+                  </button>
+                ))}
+              </div>
+
+              {/* Markets Table */}
+              <div className="border border-white/10 rounded-2xl overflow-hidden bg-black/20">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#1a1d13] text-white/50 uppercase border-b border-white/10 font-mono text-[10px]">
+                      <tr>
+                        <th className="p-3.5">Asset / Symbol</th>
+                        <th className="p-3.5">Category</th>
+                        <th className="p-3.5 text-right">Price</th>
+                        <th className="p-3.5 text-right">24h Change</th>
+                        <th className="p-3.5 hidden md:table-cell">24h Volume / Cap</th>
+                        <th className="p-3.5 text-right">Execution</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {filteredInstruments.map((inst) => (
+                        <tr key={inst.symbol} className="hover:bg-white/[0.03] transition-colors">
+                          <td className="p-3.5">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs text-white shrink-0 shadow"
+                                style={{ backgroundColor: inst.avatarBg }}
+                              >
+                                {inst.symbol.slice(0, 3)}
+                              </div>
+                              <div>
+                                <span className="font-bold text-white block">{inst.symbol}</span>
+                                <span className="text-[11px] text-white/40">{inst.name}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3.5">
+                            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">
+                              {inst.category}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-right font-mono font-bold text-white">
+                            {inst.currency === 'USD' ? '$' : ''}{inst.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                          </td>
+                          <td className={`p-3.5 text-right font-mono font-bold ${inst.deltaPercent >= 0 ? 'text-[#6dff8a]' : 'text-[#ff5c5c]'}`}>
+                            <span className="inline-flex items-center gap-1 justify-end">
+                              {inst.deltaPercent >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                              {inst.deltaPercent >= 0 ? '+' : ''}{inst.deltaPercent.toFixed(2)}%
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-white/40 font-mono hidden md:table-cell">
+                            {inst.marketCap || inst.volume24h || '—'}
+                          </td>
+                          <td className="p-3.5 text-right space-x-2">
+                            <button
+                              onClick={() => onOpenTrade(inst.symbol)}
+                              disabled={!currentUser.allowTrading}
+                              className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all ${
+                                currentUser.allowTrading
+                                  ? 'bg-[#6dff8a] text-[#15170f] hover:bg-[#5ce077] shadow-sm'
+                                  : 'bg-white/10 text-white/30 cursor-not-allowed'
+                              }`}
+                            >
+                              Trade {inst.symbol}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredInstruments.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="p-8 text-center text-white/40">
+                            No market instruments found matching your search.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
 
@@ -812,6 +948,74 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Discover Pro Investors */}
+              <div className="pt-4 border-t border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span>Featured Pro Investors</span>
+                      <span className="text-[10px] text-[#6dff8a] font-mono bg-[#6dff8a]/10 px-2 py-0.5 rounded">
+                        Audited Performance
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-white/50">Mirror elite traders with automated execution and customizable stop-loss.</p>
+                  </div>
+                  <a
+                    href="/popular-investors"
+                    className="text-xs text-[#6dff8a] hover:underline font-semibold"
+                  >
+                    View All &rarr;
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {investors.map((inv) => (
+                    <div
+                      key={inv.id}
+                      className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-[#6dff8a]/30 transition-all space-y-3 text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={inv.avatarUrl}
+                          alt={inv.name}
+                          referrerPolicy="no-referrer"
+                          className="w-10 h-10 rounded-xl object-cover bg-white/10"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h5 className="font-bold text-white text-xs truncate">{inv.name}</h5>
+                          <span className="text-[10px] text-white/40 block truncate">{inv.handle} • {inv.role}</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-1.5 p-2 rounded-xl bg-black/40 text-center text-[10px]">
+                        <div>
+                          <span className="text-white/40 block">Return</span>
+                          <span className="font-bold text-[#6dff8a]">+{inv.return24M}%</span>
+                        </div>
+                        <div>
+                          <span className="text-white/40 block">Copiers</span>
+                          <span className="font-bold text-white font-mono">{inv.copiers.toLocaleString()}</span>
+                        </div>
+                        <div>
+                          <span className="text-white/40 block">Risk</span>
+                          <span className="font-bold text-white">{inv.riskScore}/10</span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onCopyInvestor) onCopyInvestor(inv);
+                        }}
+                        className="w-full py-2 rounded-xl bg-[#6dff8a] hover:bg-[#5ce077] text-[#15170f] font-bold text-xs transition-colors"
+                      >
+                        Copy {inv.name.split(' ')[0]}
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
