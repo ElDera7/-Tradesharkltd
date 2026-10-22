@@ -31,11 +31,11 @@ services:
       - key: ADMIN_PASSWORD
         value: Shark@Admin2025!
       - key: ADMIN_EMAIL
-        value: admin@tradesharks.online
+        value: info@tradesharks.online
       - key: ADMIN_NAME
         value: System Administrator
       - key: ADMIN_NOTIFY_EMAIL
-        value: admin@tradesharks.online
+        value: info@tradesharks.online
       - key: LOGIN_OTP
         value: "true"
       - key: OTP_TTL_MINUTES
@@ -57,13 +57,13 @@ services:
       - key: MIN_WITHDRAWAL
         value: "50"
       - key: SUPPORT_EMAIL
-        value: support@tradesharks.online
+        value: info@tradesharks.online
       - key: MAIL_FROM_NAME
         value: TradeShark
       - key: MAIL_FROM_ADDRESS
-        value: noreply@tradesharks.online
+        value: info@tradesharks.online
       - key: MAIL_REPLY_TO
-        value: support@tradesharks.online
+        value: info@tradesharks.online
       - key: EMAIL_TRADE_CONFIRMATIONS
         value: "true"
       - key: EMAIL_LOGIN_ALERTS
