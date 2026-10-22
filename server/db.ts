@@ -119,6 +119,24 @@ class Store {
           ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
           max: 10,
         });
+
+        // Test connection; retry without SSL if server doesn't support SSL
+        try {
+          await this.pgPool.query('SELECT 1');
+        } catch (connErr: any) {
+          if (needsSsl && /does not support SSL/i.test(connErr?.message || '')) {
+            console.warn('[db] Postgres does not support SSL, reconnecting without SSL...');
+            await this.pgPool.end().catch(() => {});
+            this.pgPool = new pg.Pool({
+              connectionString: config.databaseUrl,
+              ssl: undefined,
+              max: 10,
+            });
+            await this.pgPool.query('SELECT 1');
+          } else {
+            throw connErr;
+          }
+        }
         await this.pgPool.query(`
           CREATE TABLE IF NOT EXISTS app_documents (
             collection TEXT NOT NULL,
