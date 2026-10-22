@@ -37,7 +37,7 @@ services:
       - key: ADMIN_NOTIFY_EMAIL
         value: support@tradesharks.online
       - key: LOGIN_OTP
-        value: "false"
+        value: "true"
       - key: OTP_TTL_MINUTES
         value: "10"
       - key: MAX_FAILED_LOGINS
