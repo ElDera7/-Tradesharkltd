@@ -1,0 +1,61 @@
+services:
+  - type: web
+    name: tradeshark
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_NAME
+        value: TradeShark
+      - key: COMPANY_LEGAL_NAME
+        value: TradeShark Ltd
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        value: Shark@Admin2025!
+      - key: ADMIN_EMAIL
+        value: admin@tradesharkltd.com
+      - key: ADMIN_NAME
+        value: System Administrator
+      - key: ADMIN_NOTIFY_EMAIL
+        value: admin@tradesharkltd.com
+      - key: LOGIN_OTP
+        value: "true"
+      - key: OTP_TTL_MINUTES
+        value: "10"
+      - key: MAX_FAILED_LOGINS
+        value: "5"
+      - key: LOCKOUT_MINUTES
+        value: "15"
+      - key: SHOW_ADMIN_LINK
+        value: "false"
+      - key: SEED_DEMO_DATA
+        value: "false"
+      - key: ENABLE_DEMO_LOGINS
+        value: "false"
+      - key: SIGNUP_BONUS
+        value: "0"
+      - key: MIN_DEPOSIT
+        value: "100"
+      - key: MIN_WITHDRAWAL
+        value: "50"
+      - key: SUPPORT_EMAIL
+        value: support@tradesharkltd.com
+      - key: MAIL_FROM_NAME
+        value: TradeShark
+      - key: MAIL_FROM_ADDRESS
+        value: noreply@tradesharkltd.com
+      - key: MAIL_REPLY_TO
+        value: support@tradesharkltd.com
+      - key: EMAIL_TRADE_CONFIRMATIONS
+        value: "true"
+      - key: EMAIL_LOGIN_ALERTS
+        value: "false"

@@ -17,10 +17,12 @@ const num = (key: string, fallback: number): number => {
 
 const isProd = env('NODE_ENV', 'development') === 'production';
 
-// Railway exposes RAILWAY_PUBLIC_DOMAIN automatically when a domain is attached.
+// Auto-detect public URL from Render (RENDER_EXTERNAL_URL) or Railway (RAILWAY_PUBLIC_DOMAIN)
+const renderUrl = env('RENDER_EXTERNAL_URL') || (env('RENDER_EXTERNAL_HOSTNAME') ? `https://${env('RENDER_EXTERNAL_HOSTNAME')}` : '');
 const railwayDomain = env('RAILWAY_PUBLIC_DOMAIN');
 const port = num('PORT', 3000);
-const appUrl = env('APP_URL', railwayDomain ? `https://${railwayDomain}` : `http://localhost:${port}`).replace(/\/+$/, '');
+const defaultAppUrl = renderUrl || (railwayDomain ? `https://${railwayDomain}` : `http://localhost:${port}`);
+const appUrl = env('APP_URL', defaultAppUrl).replace(/\/+$/, '');
 
 // If JWT_SECRET is not provided, a secret is generated once and persisted in the database (see seed.ts),
 // so sessions survive restarts with zero configuration.
