@@ -214,7 +214,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartInvesting, onSelectInstrument
                 )}
 
                 {/* Bottom Quick Links */}
-                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+                <div className="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
                   <a
                     href="/markets"
                     className="flex items-center gap-1 text-[#6dff8a] hover:underline font-semibold"

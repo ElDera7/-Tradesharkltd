@@ -17,11 +17,14 @@ const num = (key: string, fallback: number): number => {
 
 const isProd = env('NODE_ENV', 'development') === 'production';
 
+const PRIMARY_PROD_DOMAIN = 'tradesharks.online';
 // Auto-detect public URL from Render (RENDER_EXTERNAL_URL) or Railway (RAILWAY_PUBLIC_DOMAIN)
 const renderUrl = env('RENDER_EXTERNAL_URL') || (env('RENDER_EXTERNAL_HOSTNAME') ? `https://${env('RENDER_EXTERNAL_HOSTNAME')}` : '');
 const railwayDomain = env('RAILWAY_PUBLIC_DOMAIN');
 const port = num('PORT', 3000);
-const defaultAppUrl = renderUrl || (railwayDomain ? `https://${railwayDomain}` : `http://localhost:${port}`);
+const defaultAppUrl = isProd 
+  ? `https://${PRIMARY_PROD_DOMAIN}` 
+  : (renderUrl || (railwayDomain ? `https://${railwayDomain}` : `http://localhost:${port}`));
 const appUrl = env('APP_URL', defaultAppUrl).replace(/\/+$/, '');
 
 // If JWT_SECRET is not provided, a secret is generated once and persisted in the database (see seed.ts),
@@ -31,8 +34,15 @@ const jwtFromEnv = !!env('JWT_SECRET');
 
 const appName = env('APP_NAME', 'TradeShark');
 const legalName = env('COMPANY_LEGAL_NAME', `${appName} Ltd`);
-const domain = (() => { try { return new URL(appUrl).hostname; } catch { return 'localhost'; } })();
-const supportEmail = env('SUPPORT_EMAIL', `support@${domain}`);
+const domain = (() => { 
+  try { 
+    const h = new URL(appUrl).hostname; 
+    return (h.includes('onrender.com') || h.includes('railway.app') || h === 'localhost') ? PRIMARY_PROD_DOMAIN : h; 
+  } catch { 
+    return PRIMARY_PROD_DOMAIN; 
+  } 
+})();
+const supportEmail = env('SUPPORT_EMAIL', `support@${PRIMARY_PROD_DOMAIN}`);
 
 const rawDbUrl = env('DATABASE_URL');
 const mysqlUrl = env('MYSQL_URL') || env('MYSQL_PRIVATE_URL') || (rawDbUrl && /^mysql/i.test(rawDbUrl) ? rawDbUrl : '');

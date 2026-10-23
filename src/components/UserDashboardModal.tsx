@@ -25,7 +25,8 @@ import {
   Check,
   ShieldAlert,
   LogOut,
-  Search
+  Search,
+  Menu
 } from 'lucide-react';
 import { TradeSharkLogo } from './TradeSharkLogo';
 import { useBrokerage } from '../context/BrokerageContext';
@@ -100,6 +101,7 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
   React.useEffect(() => { if (initialTab && TAB_IDS.includes(initialTab as UserTab)) setActiveTab(initialTab as UserTab); }, [initialTab]);
   const [accountType, setAccountType] = useState<'real' | 'virtual'>('real');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Deposit form state
   const [depositAmount, setDepositAmount] = useState(String(Math.max(config.minDeposit, 1000)));
@@ -196,41 +198,79 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
       <div 
-        className="w-full max-w-7xl h-[94vh] bg-[#14170e] border border-white/15 rounded-3xl shadow-2xl flex overflow-hidden text-left"
+        className="w-full max-w-7xl h-full sm:h-[94vh] bg-[#14170e] border-0 sm:border border-white/15 rounded-none sm:rounded-3xl shadow-2xl flex overflow-hidden text-left relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Dedicated Sidebar for All Options */}
-        <UserSidebar
-          activeTab={activeTab}
-          onSelectTab={setActiveTab}
-          currentUser={currentUser}
-          accountType={accountType}
-          onToggleAccountType={setAccountType}
-          positionsCount={userPositions.length}
-          unreadEmailsCount={unreadEmailsCount}
-          onOpenAdminPortal={onOpenAdminPortal}
-          onLogout={handleLogout}
-          onClose={onClose}
-        />
+        {/* Mobile Sidebar Off-Canvas Drawer (md:hidden) */}
+        {mobileMenuOpen && (
+          <div 
+            className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm md:hidden flex animate-fadeIn"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div 
+              className="w-72 max-w-[85vw] h-full bg-[#12140c] shadow-2xl relative flex flex-col"
+              onClick={e => e.stopPropagation()}
+            >
+              <UserSidebar
+                activeTab={activeTab}
+                onSelectTab={setActiveTab}
+                currentUser={currentUser}
+                accountType={accountType}
+                onToggleAccountType={setAccountType}
+                positionsCount={userPositions.length}
+                unreadEmailsCount={unreadEmailsCount}
+                onOpenAdminPortal={onOpenAdminPortal}
+                onLogout={handleLogout}
+                onClose={onClose}
+                onCloseDrawer={() => setMobileMenuOpen(false)}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Dedicated Desktop Sidebar (hidden on mobile, flex on desktop) */}
+        <div className="hidden md:flex shrink-0">
+          <UserSidebar
+            activeTab={activeTab}
+            onSelectTab={setActiveTab}
+            currentUser={currentUser}
+            accountType={accountType}
+            onToggleAccountType={setAccountType}
+            positionsCount={userPositions.length}
+            unreadEmailsCount={unreadEmailsCount}
+            onOpenAdminPortal={onOpenAdminPortal}
+            onLogout={handleLogout}
+            onClose={onClose}
+          />
+        </div>
 
         {/* Right Main Body Content */}
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#15170f]">
           {/* Header Bar */}
-          <div className="p-4 sm:p-5 border-b border-white/10 bg-[#171a10] flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-bold text-white">
-                  {tabTitles[activeTab]?.title || 'Client Portal'}
-                </h2>
-                <span className="text-[10px] bg-[#6dff8a]/20 text-[#6dff8a] font-mono px-2 py-0.5 rounded font-bold uppercase">
-                  /dashboard
-                </span>
+          <div className="p-3 sm:p-5 border-b border-white/10 bg-[#171a10] flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                className="md:hidden p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:text-[#6dff8a] transition-colors"
+                title="Open navigation menu"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base md:text-lg font-bold text-white truncate max-w-[140px] sm:max-w-none">
+                    {tabTitles[activeTab]?.title || 'Client Portal'}
+                  </h2>
+                  <span className="text-[10px] bg-[#6dff8a]/20 text-[#6dff8a] font-mono px-2 py-0.5 rounded font-bold uppercase hidden sm:inline">
+                    /dashboard
+                  </span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-[#a3a89e] truncate max-w-[160px] sm:max-w-none">
+                  {tabTitles[activeTab]?.subtitle || 'TradeShark Client Portal'}
+                </p>
               </div>
-              <p className="text-xs text-[#a3a89e]">
-                {tabTitles[activeTab]?.subtitle || 'TradeShark Client Portal'}
-              </p>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
@@ -1092,6 +1132,63 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
           )}
 
         </div>
+
+          {/* Mobile Bottom Navigation Bar for instant thumb switching */}
+          <div className="md:hidden bg-[#12140c] border-t border-white/10 py-2 px-2 flex items-center justify-around z-20 shrink-0 select-none">
+            <button
+              onClick={() => setActiveTab('portfolio')}
+              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all ${
+                activeTab === 'portfolio' ? 'text-[#6dff8a] bg-white/5 font-bold' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <Wallet className="w-4 h-4" />
+              <span className="text-[10px]">Overview</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('positions')}
+              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all relative ${
+                activeTab === 'positions' ? 'text-[#6dff8a] bg-white/5 font-bold' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              {userPositions.length > 0 && (
+                <span className="absolute top-0 right-1 w-2 h-2 rounded-full bg-[#6dff8a]" />
+              )}
+              <span className="text-[10px]">Trades</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('markets')}
+              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all ${
+                activeTab === 'markets' ? 'text-[#6dff8a] bg-white/5 font-bold' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-[10px]">Markets</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('deposit')}
+              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all ${
+                activeTab === 'deposit' ? 'text-[#6dff8a] bg-white/5 font-bold' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <ArrowUpRight className="w-4 h-4" />
+              <span className="text-[10px]">Deposit</span>
+            </button>
+
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="flex flex-col items-center gap-1 py-1 px-2 rounded-xl text-white/60 hover:text-white transition-all relative"
+            >
+              <Menu className="w-4 h-4" />
+              {unreadEmailsCount > 0 && (
+                <span className="absolute top-0 right-1 w-2 h-2 rounded-full bg-cyan-400" />
+              )}
+              <span className="text-[10px]">More</span>
+            </button>
+          </div>
         </div>
 
       </div>

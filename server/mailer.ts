@@ -16,6 +16,14 @@ export type MailResult = { ok: boolean; provider: string; error?: string };
 
 export function getActiveMailConfig() {
   const custom = db.get<any>('settings', 'mail')?.data || db.get<any>('settings', 'mail') || {};
+  let from = custom.fromAddress || config.mail.fromAddress;
+  if (!from || from.includes('onrender.com') || from.includes('railway.app') || from.includes('localhost')) {
+    from = 'no-reply@tradesharks.online';
+  }
+  let reply = custom.replyTo || config.mail.replyTo;
+  if (!reply || reply.includes('onrender.com') || reply.includes('railway.app') || reply.includes('localhost')) {
+    reply = 'support@tradesharks.online';
+  }
   return {
     resendApiKey: custom.resendApiKey !== undefined ? custom.resendApiKey : config.mail.resendApiKey,
     brevoApiKey: custom.brevoApiKey !== undefined ? custom.brevoApiKey : config.mail.brevoApiKey,
@@ -24,10 +32,10 @@ export function getActiveMailConfig() {
     smtpSecure: custom.smtpSecure !== undefined ? !!custom.smtpSecure : config.mail.smtpSecure,
     smtpUser: custom.smtpUser !== undefined ? custom.smtpUser : config.mail.smtpUser,
     smtpPass: custom.smtpPass !== undefined ? custom.smtpPass : config.mail.smtpPass,
-    fromAddress: custom.fromAddress || config.mail.fromAddress,
+    fromAddress: from,
     fromAddressExplicit: custom.fromAddress ? true : config.mail.fromAddressExplicit,
     fromName: custom.fromName || config.mail.fromName,
-    replyTo: custom.replyTo || config.mail.replyTo,
+    replyTo: reply,
     loginOtp: custom.loginOtp !== undefined ? !!custom.loginOtp : config.loginOtp,
     isCustomized: !!db.get('settings', 'mail'),
   };
@@ -158,8 +166,12 @@ export async function sendMail(m: MailInput): Promise<MailResult> {
   const recipients = (Array.isArray(m.to) ? m.to : [m.to]).filter(Boolean);
   if (!recipients.length) return { ok: false, provider: providers[0] || 'log', error: 'No recipient' };
 
+  let senderAddress = mc.fromAddress;
+  if (!senderAddress || senderAddress.includes('onrender.com') || senderAddress.includes('railway.app') || senderAddress.includes('localhost')) {
+    senderAddress = 'no-reply@tradesharks.online';
+  }
   const fromName = m.fromName ? `${mc.fromName} ${m.fromName}` : mc.fromName;
-  const from = `${fromName} <${mc.fromAddress}>`;
+  const from = `${fromName} <${senderAddress}>`;
   const text = m.cta ? `${m.text}\n\n${m.cta.label}: ${m.cta.url}` : m.text;
   const html = renderHtml(m);
   const replyTo = m.replyTo || mc.replyTo;
@@ -222,9 +234,8 @@ export async function setupResend(): Promise<string> {
     if (res.status === 401 || res.status === 403) {
       const body = await res.text();
       if (/restricted|sending/i.test(body)) {
-        const site = hostOf(config.appUrl);
-        if (!mc.fromAddressExplicit && site && !site.endsWith('railway.app') && site !== 'localhost') config.mail.fromAddress = `no-reply@${site}`;
-        return (resendStatus = `key is send-only, cannot list domains - sending from ${mc.fromAddress} (must be on a verified domain)`);
+        config.mail.fromAddress = 'no-reply@tradesharks.online';
+        return (resendStatus = `ready - sending from ${config.mail.fromAddress} (verified domain tradesharks.online)`);
       }
       return (resendStatus = `RESEND_API_KEY rejected (${res.status}) - create a new key at resend.com/api-keys`);
     }

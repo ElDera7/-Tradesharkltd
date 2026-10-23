@@ -258,11 +258,12 @@ class Store {
   }
 
   all<T = any>(c: Collection): T[] {
-    return Array.from(this.cache.get(c)!.values()) as T[];
+    const map = this.cache?.get(c);
+    return map ? Array.from(map.values()) as T[] : [];
   }
 
   get<T = any>(c: Collection, id: string): T | undefined {
-    return this.cache.get(c)!.get(id) as T | undefined;
+    return this.cache?.get(c)?.get(id) as T | undefined;
   }
 
   find<T = any>(c: Collection, pred: (d: T) => boolean): T | undefined {

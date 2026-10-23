@@ -17,7 +17,8 @@ import {
   Eye, 
   Building2,
   Lock,
-  LogOut
+  LogOut,
+  X
 } from 'lucide-react';
 import { TradeSharkLogo } from '../TradeSharkLogo';
 import { UserAccount } from '../../types';
@@ -45,6 +46,7 @@ interface UserSidebarProps {
   onOpenAdminPortal?: () => void;
   onLogout?: () => void;
   onClose: () => void;
+  onCloseDrawer?: () => void;
 }
 
 export const UserSidebar: React.FC<UserSidebarProps> = ({
@@ -57,7 +59,8 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
   unreadEmailsCount,
   onOpenAdminPortal,
   onLogout,
-  onClose
+  onClose,
+  onCloseDrawer
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -164,9 +167,20 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
       <div className="p-4 sm:p-5 border-b border-white/10">
         <div className="flex items-center justify-between">
           <TradeSharkLogo size="sm" showLtd={true} />
-          <span className="text-[9px] bg-[#6dff8a]/20 text-[#6dff8a] border border-[#6dff8a]/30 font-mono px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-            CLIENT PORTAL
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] bg-[#6dff8a]/20 text-[#6dff8a] border border-[#6dff8a]/30 font-mono px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+              CLIENT PORTAL
+            </span>
+            {onCloseDrawer && (
+              <button 
+                onClick={onCloseDrawer} 
+                className="md:hidden p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white"
+                title="Close drawer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* User Card */}
@@ -252,7 +266,10 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
               return (
                 <button
                   key={item.id}
-                  onClick={() => onSelectTab(item.id)}
+                  onClick={() => {
+                    onSelectTab(item.id);
+                    onCloseDrawer?.();
+                  }}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all ${
                     isActive
                       ? 'bg-[#6dff8a]/15 text-[#6dff8a] border border-[#6dff8a]/30 font-bold shadow-sm'
