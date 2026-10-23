@@ -7,6 +7,7 @@ import { createMessage, marketSnapshot, getQuote, getMarketSettings } from '../s
 import { rateLimit } from '../rateLimit';
 import { INSTRUMENTS } from '../../src/data/mockData';
 import { listInvestors } from '../copytrader';
+import { getActiveLiveChat } from '../livechat';
 
 export const publicRouter = Router();
 
@@ -17,6 +18,7 @@ publicRouter.get('/health', async (_req, res) => {
 
 publicRouter.get('/config', (_req, res) => {
   const b = config.brand;
+  const chat = getActiveLiveChat();
   res.json({
     appName: b.appName,
     legalName: b.legalName,
@@ -33,7 +35,16 @@ publicRouter.get('/config', (_req, res) => {
     regulatoryText: b.regulatoryText,
     social: b.social,
     apps: b.apps,
-    liveChatScript: b.liveChatScript,
+    liveChatScript: chat.scriptUrl || b.liveChatScript || '',
+    liveChat: {
+      active: chat.active,
+      provider: chat.provider,
+      scriptUrl: chat.scriptUrl,
+      tidioKey: chat.tidioKey,
+      smartsuppKey: chat.smartsuppKey,
+      tawktoPropertyId: chat.tawktoPropertyId,
+      tawktoWidgetId: chat.tawktoWidgetId,
+    },
     minDeposit: config.minDeposit,
     minWithdrawal: config.minWithdrawal,
     practiceBalance: config.practiceBalance,

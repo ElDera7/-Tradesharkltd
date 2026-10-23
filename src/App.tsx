@@ -24,6 +24,7 @@ import { AuthModal } from './components/AuthModal';
 import { AiChatDrawer } from './components/AiChatDrawer';
 import { UserDashboardModal } from './components/UserDashboardModal';
 import { AdminPortalModal } from './components/AdminPortalModal';
+import { LiveChatWidget } from './components/LiveChatWidget';
 
 // Pages
 import { ContentPage } from './pages/ContentPage';
@@ -305,7 +306,7 @@ export default function App() {
       />
 
       <AiChatDrawer isOpen={isAiChatOpen} onClose={() => setIsAiChatOpen(false)} onOpenTrade={handleOpenTradeForSymbol} />
-
+      <LiveChatWidget />
     </div>
   );
 }

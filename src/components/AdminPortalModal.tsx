@@ -44,6 +44,7 @@ import { UserAccount, UserTier, AccountStatus, FundingTransaction } from '../typ
 import { AdminSidebar, AdminTab } from './AdminPortal/AdminSidebar';
 import { AdminCopyTraderTab } from './AdminPortal/AdminCopyTraderTab';
 import { AdminEmailsTab } from './AdminPortal/AdminEmailsTab';
+import { AdminLiveChatTab } from './AdminPortal/AdminLiveChatTab';
 import { AdminDatabaseBackupPanel } from './AdminPortal/AdminDatabaseBackupPanel';
 import { AdminKycInspectorModal } from './AdminPortal/AdminKycInspectorModal';
 import { AdminLoginGate, AdminSession } from './AdminPortal/AdminLoginGate';
@@ -55,7 +56,7 @@ interface AdminPortalModalProps {
   onSwitchToUserDashboard?: () => void;
 }
 
-const ADMIN_TABS: AdminTab[] = ['overview', 'users', 'setup', 'kyc', 'funding', 'emails', 'markets', 'copytrader', 'audit', 'settings'];
+const ADMIN_TABS: AdminTab[] = ['overview', 'users', 'setup', 'kyc', 'funding', 'emails', 'livechat', 'markets', 'copytrader', 'audit', 'settings'];
 
 export const AdminPortalModal: React.FC<AdminPortalModalProps> = (props) =>
   props.isOpen ? <AdminPortalInner {...props} /> : null;
@@ -270,6 +271,7 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
     kyc: { title: 'KYC & Biometrics Verification Desk', subtitle: 'Passport, ID, address and selfie verification audit' },
     funding: { title: 'Funding Approvals & Capital Queue', subtitle: 'Treasury desk clearance for deposits and withdrawals' },
     emails: { title: 'Email Dispatch & Client Communications', subtitle: 'Automated compliance notices, margin calls, and broadcast announcements' },
+    livechat: { title: 'Live Chat & Help Desk Integrations', subtitle: 'Auto-deploy Tidio, Smartsupp, Tawk.to, or custom live chat widgets' },
     markets: { title: 'Market Trading & Risk Controls', subtitle: 'Dynamic spread overrides, circuit breaker halting, and slippage management' },
     copytrader: { title: 'CopyTrader & Popular Investors', subtitle: 'Add, edit or hide investors and manage every client copy portfolio' },
     audit: { title: 'Regulatory Compliance Audit Trail', subtitle: 'Immutable administrative logs with millisecond timestamps' },
@@ -619,6 +621,11 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
             {/* TAB: EMAILING SYSTEM */}
             {activeTab === 'emails' && (
               <AdminEmailsTab onNotify={showToast} />
+            )}
+
+            {/* TAB: LIVE CHAT SYSTEM */}
+            {activeTab === 'livechat' && (
+              <AdminLiveChatTab />
             )}
 
             {activeTab === 'copytrader' && (

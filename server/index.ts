@@ -15,6 +15,7 @@ import { adminRouter } from './routes/admin';
 import { publicRouter } from './routes/public';
 import { SITE_PAGES } from '../src/data/pages';
 import { INSTRUMENTS } from '../src/data/mockData';
+import { getActiveLiveChat, buildChatScriptHtml } from './livechat';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -60,8 +61,7 @@ async function main() {
     const rendered = indexHtml
       .replace(/__APP_NAME__/g, esc(b.appName))
       .replace(/__APP_TAGLINE__/g, esc(b.tagline))
-      .replace(/__APP_URL__/g, esc(config.appUrl))
-      .replace('</head>', b.liveChatScript ? `<script src="${esc(b.liveChatScript)}" async></script></head>` : '</head>');
+      .replace(/__APP_URL__/g, esc(config.appUrl));
 
     app.use('/assets', express.static(path.join(distDir, 'assets'), { immutable: true, maxAge: '1y' }));
     app.use(express.static(distDir, { index: false, maxAge: '1h' }));
@@ -72,7 +72,15 @@ async function main() {
       const today = new Date().toISOString().slice(0, 10);
       res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(p => `  <url><loc>${config.appUrl}${p}</loc><lastmod>${today}</lastmod></url>`).join('\n')}\n</urlset>`);
     });
-    app.get('*', (_req, res) => res.type('html').send(rendered));
+    app.get('*', (_req, res) => {
+      const chatHtml = buildChatScriptHtml(getActiveLiveChat());
+      let html = rendered;
+      // Only inject if not already present (index.html has it hardcoded, so this is a no-op in normal builds)
+      if (chatHtml && !html.includes('embed.tawk.to') && !html.includes('Tawk_API')) {
+        html = html.replace('</body>', `${chatHtml}\n</body>`);
+      }
+      res.type('html').send(html);
+    });
   } else {
     app.get('/', (_req, res) => res.send('Frontend not built. Run "npm run build" (API is available under /api).'));
   }

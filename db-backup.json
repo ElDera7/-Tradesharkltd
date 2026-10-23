@@ -30,6 +30,18 @@
         "id": "system",
         "jwtSecret": "a23069ad46181b6711377b8f96e2ae5c61f90d6300c293c55fa98406df608fb56add06a21a09a2129028350bda77ffce",
         "createdAt": "2026-10-17T09:28:27.798Z"
+      },
+      {
+        "id": "livechat",
+        "data": {
+          "provider": "tawkto",
+          "tidioKey": "",
+          "smartsuppKey": "",
+          "tawktoPropertyId": "6adb9755a8d435346081b719",
+          "tawktoWidgetId": "1k5kse9kh",
+          "tawktoKey": "6adb9755a8d435346081b719/1k5kse9kh",
+          "customScriptUrl": ""
+        }
       }
     ],
     "otps": [],

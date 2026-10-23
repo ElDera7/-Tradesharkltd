@@ -154,6 +154,16 @@ export const config = {
     model: env('GEMINI_MODEL', 'gemini-2.5-flash'),
   },
 
+  liveChat: {
+    provider: env('LIVE_CHAT_PROVIDER', 'tawkto'),
+    tidioKey: env('TIDIO_KEY', env('TIDIO_PUBLIC_KEY', '')),
+    smartsuppKey: env('SMARTSUPP_KEY', ''),
+    tawktoPropertyId: env('TAWKTO_PROPERTY_ID', '6adb9755a8d435346081b719'),
+    tawktoWidgetId: env('TAWKTO_WIDGET_ID', '1k5kse9kh'),
+    tawktoKey: env('TAWKTO_KEY', '6adb9755a8d435346081b719/1k5kse9kh'),
+    customScriptUrl: env('LIVE_CHAT_SCRIPT_URL', ''),
+  },
+
   payments: {
     bankName: env('DEPOSIT_BANK_NAME'),
     bankAccountName: env('DEPOSIT_BANK_ACCOUNT_NAME'),

@@ -10,6 +10,7 @@ import {
 import { createToken } from './auth';
 import { sendMail, verifyMailer, mailProviders, resendStatus, getActiveMailConfig, resetSmtpTransport } from '../mailer';
 import { listInvestors, createInvestor, updateInvestor, deleteInvestor, adjustCopy, resetInvestorIndex, listAllCopies } from '../copytrader';
+import { getActiveLiveChat, saveLiveChatConfig, resetLiveChatConfig } from '../livechat';
 
 export const adminRouter = Router();
 
@@ -121,6 +122,23 @@ adminRouter.post('/mail/test', requireAdmin('emails'), wrap(async (req, res) => 
   await audit(actorOf(req), 'Email Test', `Test email to ${to}: ${r.ok ? `sent via ${r.provider}` : `FAILED - ${r.error}`}`, 'COMPLIANCE');
   if (!r.ok) return res.status(502).json({ ok: false, error: r.error, provider: r.provider });
   res.json({ ok: true, provider: r.provider, message: r.provider === 'log' ? 'No email provider is configured - the email was only written to the server logs.' : `Test email sent to ${to} via ${r.provider}.` });
+}));
+
+// ---------- Live Chat integrations ----------
+adminRouter.get('/livechat', requireAdmin(), wrap(async (_req, res) => {
+  res.json({ config: getActiveLiveChat() });
+}));
+
+adminRouter.put('/livechat', requireAdmin(), wrap(async (req, res) => {
+  const cfg = await saveLiveChatConfig(req.body || {});
+  await audit(actorOf(req), 'Live Chat Config Updated', `Configured live chat provider: ${cfg.provider} (active: ${cfg.active}).`, 'COMPLIANCE');
+  res.json({ ok: true, config: cfg });
+}));
+
+adminRouter.post('/livechat/reset', requireAdmin(), wrap(async (req, res) => {
+  const cfg = await resetLiveChatConfig();
+  await audit(actorOf(req), 'Live Chat Config Reset', 'Reset live chat to environment variable defaults.', 'COMPLIANCE');
+  res.json({ ok: true, config: cfg });
 }));
 
 // ---------- CopyTrader management ----------

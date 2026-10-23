@@ -36,6 +36,7 @@ import { UserKycTab } from './UserPortal/UserKycTab';
 import { UserInboxTab } from './UserPortal/UserInboxTab';
 import { UserLoginGate } from './UserPortal/UserLoginGate';
 import { errMsg } from '../lib/api';
+import { navigate } from '../lib/router';
 
 interface UserDashboardModalProps {
   isOpen: boolean;
@@ -347,7 +348,7 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
           )}
 
           {/* Tab Content Container */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 pb-24 md:pb-6">
 
             {/* TAB: KYC & VERIFICATION */}
             {activeTab === 'kyc' && (
@@ -935,8 +936,16 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
 
               {copiedInvestors.length === 0 && (
                 <div className="p-8 rounded-2xl bg-white/[0.03] border border-white/10 text-center space-y-3">
-                  <p className="text-sm text-white/60">You are not copying anyone yet.</p>
-                  <a href="/popular-investors" className="inline-block px-5 py-2.5 rounded-full bg-[#6dff8a] text-[#15170f] font-bold text-xs">Browse Popular Investors</a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      navigate('/popular-investors');
+                    }}
+                    className="inline-block px-5 py-2.5 rounded-full bg-[#6dff8a] hover:bg-[#5ce077] text-[#15170f] font-bold text-xs transition-colors cursor-pointer"
+                  >
+                    Browse Popular Investors
+                  </button>
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1002,12 +1011,16 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
                     </h4>
                     <p className="text-[11px] text-white/50">Mirror elite traders with automated execution and customizable stop-loss.</p>
                   </div>
-                  <a
-                    href="/popular-investors"
-                    className="text-xs text-[#6dff8a] hover:underline font-semibold"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      navigate('/popular-investors');
+                    }}
+                    className="text-xs text-[#6dff8a] hover:underline font-semibold cursor-pointer"
                   >
                     View All &rarr;
-                  </a>
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1133,61 +1146,33 @@ const UserDashboardInner: React.FC<UserDashboardModalProps> = ({
 
         </div>
 
-          {/* Mobile Bottom Navigation Bar for instant thumb switching */}
-          <div className="md:hidden bg-[#12140c] border-t border-white/10 py-2 px-2 flex items-center justify-around z-20 shrink-0 select-none">
-            <button
-              onClick={() => setActiveTab('portfolio')}
-              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all ${
-                activeTab === 'portfolio' ? 'text-[#6dff8a] bg-white/5 font-bold' : 'text-white/60 hover:text-white'
-              }`}
-            >
-              <Wallet className="w-4 h-4" />
-              <span className="text-[10px]">Overview</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('positions')}
-              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all relative ${
-                activeTab === 'positions' ? 'text-[#6dff8a] bg-white/5 font-bold' : 'text-white/60 hover:text-white'
-              }`}
-            >
-              <Layers className="w-4 h-4" />
-              {userPositions.length > 0 && (
-                <span className="absolute top-0 right-1 w-2 h-2 rounded-full bg-[#6dff8a]" />
-              )}
-              <span className="text-[10px]">Trades</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('markets')}
-              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all ${
-                activeTab === 'markets' ? 'text-[#6dff8a] bg-white/5 font-bold' : 'text-white/60 hover:text-white'
-              }`}
-            >
-              <TrendingUp className="w-4 h-4" />
-              <span className="text-[10px]">Markets</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('deposit')}
-              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all ${
-                activeTab === 'deposit' ? 'text-[#6dff8a] bg-white/5 font-bold' : 'text-white/60 hover:text-white'
-              }`}
-            >
-              <ArrowUpRight className="w-4 h-4" />
-              <span className="text-[10px]">Deposit</span>
-            </button>
-
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="flex flex-col items-center gap-1 py-1 px-2 rounded-xl text-white/60 hover:text-white transition-all relative"
-            >
-              <Menu className="w-4 h-4" />
-              {unreadEmailsCount > 0 && (
-                <span className="absolute top-0 right-1 w-2 h-2 rounded-full bg-cyan-400" />
-              )}
-              <span className="text-[10px]">More</span>
-            </button>
+          {/* Mobile Bottom Navigation Bar */}
+          <div className="md:hidden bg-[#0f1109]/95 backdrop-blur-md border-t border-white/10 py-1.5 px-3 flex items-center justify-around z-20 shrink-0 select-none safe-area-bottom">
+            {([
+              { tab: 'portfolio', icon: <Wallet className="w-5 h-5" />, label: 'Overview' },
+              { tab: 'positions', icon: <Layers className="w-5 h-5" />, label: 'Trades', badge: userPositions.length > 0 },
+              { tab: 'deposit', icon: <ArrowDownLeft className="w-5 h-5" />, label: 'Deposit' },
+              { tab: 'markets', icon: <TrendingUp className="w-5 h-5" />, label: 'Markets' },
+              { tab: 'more', icon: <Menu className="w-5 h-5" />, label: 'More', badge: unreadEmailsCount > 0, action: () => setMobileMenuOpen(true) },
+            ] as Array<{ tab: string; icon: React.ReactNode; label: string; badge?: boolean; action?: () => void }>).map(({ tab, icon, label, badge, action }) => {
+              const isActive = action ? false : activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={action ?? (() => setActiveTab(tab as UserTab))}
+                  className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all relative min-w-[52px] ${
+                    isActive ? 'text-[#6dff8a]' : 'text-white/50 active:text-white'
+                  }`}
+                >
+                  {badge && (
+                    <span className="absolute top-1.5 right-2.5 w-2 h-2 rounded-full bg-[#6dff8a] ring-2 ring-[#0f1109]" />
+                  )}
+                  {icon}
+                  <span className="text-[9px] font-semibold tracking-wide">{label}</span>
+                  {isActive && <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-[#6dff8a]" />}
+                </button>
+              );
+            })}
           </div>
         </div>
 

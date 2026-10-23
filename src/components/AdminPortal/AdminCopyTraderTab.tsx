@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { 
   Plus, 
   Save, 
@@ -17,7 +17,9 @@ import {
   Activity, 
   History,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  ImageIcon
 } from 'lucide-react';
 import { api, errMsg } from '../../lib/api';
 import { useBrokerage } from '../../context/BrokerageContext';
@@ -73,6 +75,24 @@ export const AdminCopyTraderTab: React.FC<{ onNotify: (msg: string) => void }> =
   const [editing, setEditing] = useState<Partial<AdminInvestor> | null>(null);
   const [busy, setBusy] = useState(false);
   const [adjust, setAdjust] = useState<Record<string, string>>({});
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      onNotify('Photo must be under 5 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setEditing(ed => ({ ...ed, avatarUrl: dataUrl }));
+    };
+    reader.readAsDataURL(file);
+    // reset input so same file can be re-selected
+    e.target.value = '';
+  };
 
   // Reset performance modal/state
   const [resetTarget, setResetTarget] = useState<AdminInvestor | null>(null);
@@ -333,7 +353,53 @@ export const AdminCopyTraderTab: React.FC<{ onNotify: (msg: string) => void }> =
                 {field('name', 'Name')}
                 {field('handle', 'Handle', 'text', '@handle')}
                 {field('role', 'Badge / Role', 'text', 'Elite Pro Investor')}
-                {field('avatarUrl', 'Photo URL', 'text', 'https://…')}
+                {/* Photo Upload — replaces URL text field */}
+                <div className="col-span-1 sm:col-span-2 lg:col-span-3">
+                  <label className="block text-[11px] text-white/60 mb-2 font-medium">Trader Photo</label>
+                  <div className="flex items-center gap-4">
+                    {/* Preview */}
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden border border-white/15 bg-white/5 flex items-center justify-center shrink-0">
+                      {editing?.avatarUrl ? (
+                        <img
+                          src={editing.avatarUrl}
+                          alt="Preview"
+                          className="w-full h-full object-cover object-center"
+                        />
+                      ) : (
+                        <ImageIcon className="w-7 h-7 text-white/20" />
+                      )}
+                    </div>
+                    {/* Upload controls */}
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => photoInputRef.current?.click()}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#6dff8a]/10 hover:bg-[#6dff8a]/20 border border-[#6dff8a]/30 text-[#6dff8a] text-xs font-bold transition-all"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        {editing?.avatarUrl ? 'Change Photo' : 'Upload Photo'}
+                      </button>
+                      {editing?.avatarUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setEditing(ed => ({ ...ed, avatarUrl: '' }))}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-[11px] font-semibold transition-all"
+                        >
+                          <X className="w-3 h-3" /> Remove Photo
+                        </button>
+                      )}
+                      <p className="text-[10px] text-white/30">JPG, PNG, WebP · max 5 MB</p>
+                    </div>
+                    {/* Hidden file input */}
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      className="hidden"
+                      onChange={handlePhotoUpload}
+                    />
+                  </div>
+                </div>
                 {field('return24M', '24-Month Return %', 'number')}
                 {field('riskScore', 'Risk Score (1-10)', 'number')}
                 {field('baseCopiers', 'Base Copiers (Shown + Real copies)', 'number')}
@@ -420,7 +486,14 @@ export const AdminCopyTraderTab: React.FC<{ onNotify: (msg: string) => void }> =
                   <tr key={inv.id} className="border-t border-white/5 text-white/80 hover:bg-white/[0.01]">
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        <img src={inv.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover bg-white/10 shrink-0" />
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 shrink-0 flex items-center justify-center border border-white/10">
+                          {inv.avatarUrl ? (
+                            <img src={inv.avatarUrl} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <ImageIcon className="w-4 h-4 text-white/30" />
+                          )}
+                        </div>
+
                         <div>
                           <div className="font-semibold text-white">{inv.name}</div>
                           <div className="text-white/40">{inv.handle}</div>

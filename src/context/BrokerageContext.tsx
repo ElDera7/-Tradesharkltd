@@ -140,6 +140,8 @@ interface BrokerageContextType {
   resetPassword: (token: string, password: string) => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
   resendVerification: () => Promise<string>;
+  sendSignupVerifyCode: () => Promise<{ challengeId: string; email: string; expiresInMinutes: number }>;
+  verifySignupCode: (challengeId: string, code: string) => Promise<UserAccount>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   updateProfile: (patch: Partial<UserAccount>) => Promise<void>;
   loginAdmin: (username: string, password: string, remember: boolean) => Promise<AdminSession>;
@@ -379,6 +381,18 @@ export const BrokerageProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const resendVerification = async () => (await api.post('/api/auth/resend-verification')).message as string;
 
+  const sendSignupVerifyCode = async () => {
+    const r = await api.post('/api/auth/register/send-code');
+    return { challengeId: r.challengeId as string, email: r.email as string, expiresInMinutes: (r.expiresInMinutes as number) || 10 };
+  };
+
+  const verifySignupCode = async (challengeId: string, code: string) => {
+    const r = await api.post('/api/auth/register/verify-code', { challengeId, code });
+    setCurrentUser(r.user);
+    await loadUser();
+    return r.user as UserAccount;
+  };
+
   const changePassword = async (currentPassword: string, newPassword: string) => {
     await api.post('/api/auth/change-password', { currentPassword, newPassword });
   };
@@ -581,6 +595,7 @@ export const BrokerageProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       ready, config, instruments, users, currentUser, adminSession, transactions, auditLogs, positions, emails, copies,
       marketAssets, payments, toasts, notify, refresh, investors, setInvestors,
       loginUser, verifyLoginOtp, resendLoginOtp, registerUser, logoutUser, requestPasswordReset, resetPassword, verifyEmail, resendVerification,
+      sendSignupVerifyCode, verifySignupCode,
       changePassword, updateProfile, loginAdmin, logoutAdmin,
       setCurrentUserId, createUser, updateUser, setUserStatus, toggleTradingPermission, updateUserTier, updateUserLeverage,
       sendPasswordReset, deleteUser,

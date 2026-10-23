@@ -13,12 +13,13 @@ import {
   Check, 
   Home, 
   Eye,
-  LogOut
+  LogOut,
+  MessageSquare
 } from 'lucide-react';
 import { TradeSharkLogo } from '../TradeSharkLogo';
 import { AdminSession } from './AdminLoginGate';
 
-export type AdminTab = 'overview' | 'users' | 'setup' | 'kyc' | 'funding' | 'emails' | 'markets' | 'copytrader' | 'audit' | 'settings';
+export type AdminTab = 'overview' | 'users' | 'setup' | 'kyc' | 'funding' | 'emails' | 'livechat' | 'markets' | 'copytrader' | 'audit' | 'settings';
 
 interface AdminSidebarProps {
   activeTab: AdminTab;
@@ -105,6 +106,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           {unreadInquiriesCount}
         </span>
       ) : undefined,
+      group: 'COMMUNICATIONS'
+    },
+    {
+      id: 'livechat',
+      label: 'Live Chat & Help Desk',
+      icon: <MessageSquare className="w-4 h-4" />,
       group: 'COMMUNICATIONS'
     },
     {

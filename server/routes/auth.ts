@@ -41,6 +41,57 @@ export async function sendVerificationEmail(user: any) {
   });
 }
 
+// --- Signup email OTP (6-digit code sent right after registration) ---
+const signupOtpCode = () => String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+const signupOtpHash = (id: string, code: string) => sha256(`signup-otp:${id}:${code}`);
+
+authRouter.post('/register/send-code', requireUser, rateLimit('signup-code', 5, 3600), async (req, res) => {
+  const user = (req as any).user;
+  if (user.emailVerified) return res.json({ ok: true, alreadyVerified: true });
+  // throttle resends
+  const existing = db.find<any>('otps', o => o.userId === user.id && o.type === 'signup');
+  if (existing) {
+    const wait = 60000 - (Date.now() - (existing.lastSent || 0));
+    if (wait > 0) return res.status(429).json({ error: `Please wait ${Math.ceil(wait / 1000)}s before requesting another code.` });
+    await db.remove('otps', existing.id);
+  }
+  const code = signupOtpCode();
+  const id = newId('OTP');
+  await db.put('otps', {
+    id, type: 'signup', userId: user.id,
+    codeHash: signupOtpHash(id, code),
+    attempts: 0, sends: 1, lastSent: Date.now(),
+    expires: Date.now() + 10 * 60000,
+  });
+  const r = await sendMail({
+    to: user.email,
+    subject: `Your ${config.brand.appName} verification code`,
+    fromName: 'Accounts',
+    text: `Hi ${user.name},\n\nYour email verification code is:\n\n${code}\n\nThis code expires in 10 minutes. Do not share it with anyone.`,
+  });
+  if (!r.ok) return res.status(502).json({ error: 'We could not send your verification code. Please try again.' });
+  res.json({ ok: true, challengeId: id, email: user.email, expiresInMinutes: 10 });
+});
+
+authRouter.post('/register/verify-code', requireUser, rateLimit('signup-verify', 10, 3600), async (req, res) => {
+  const user = (req as any).user;
+  if (user.emailVerified) return res.json({ ok: true, user: publicUser(user) });
+  const { challengeId, code } = req.body || {};
+  const ch = db.get<any>('otps', String(challengeId || ''));
+  if (!ch || ch.type !== 'signup' || ch.userId !== user.id) return res.status(400).json({ error: 'Invalid or expired code. Please request a new one.' });
+  if (ch.expires < Date.now()) { await db.remove('otps', ch.id); return res.status(400).json({ error: 'This code has expired. Please request a new one.' }); }
+  if ((ch.attempts || 0) >= 5) { await db.remove('otps', ch.id); return res.status(400).json({ error: 'Too many attempts. Please request a new code.' }); }
+  const hash = signupOtpHash(ch.id, String(code || '').trim());
+  if (hash !== ch.codeHash) {
+    await db.update('otps', ch.id, { attempts: (ch.attempts || 0) + 1 });
+    return res.status(400).json({ error: 'Incorrect code. Please check and try again.' });
+  }
+  await db.remove('otps', ch.id);
+  await db.update('users', user.id, { emailVerified: true });
+  const updated = db.get<any>('users', user.id);
+  res.json({ ok: true, user: publicUser(updated) });
+});
+
 // ---------------- USER ----------------
 authRouter.post('/register', rateLimit('register', 10, 3600), async (req, res) => {
   const { name, email, password, phone, country, remember, ref } = req.body || {};
@@ -67,11 +118,10 @@ authRouter.post('/register', rateLimit('register', 10, 3600), async (req, res) =
     body: `Dear ${user.name},\n\nWelcome to ${config.brand.appName}. Your trading account ${user.id} is ready.\n\nNext steps:\n1. Verify your email address (we sent you a separate link).\n2. Complete identity verification (KYC) in the Verification Centre.\n3. Fund your account and start trading - or practise first with your ${'$'}${config.practiceBalance.toLocaleString()} virtual account.\n\nIf you have any questions, reply to this email or contact ${config.brand.supportEmail}.\n\nThe ${config.brand.appName} Team`,
     cta: { label: 'Open your client portal', url: `${config.appUrl}/dashboard` },
   });
-  await sendVerificationEmail(user);
   notifyAdmins(`New registration: ${user.name}`, `${user.name} (${user.email}) just registered.\nAccount: ${user.id}\nCountry: ${user.country || '-'}\nPhone: ${user.phone || '-'}${referrer ? `\nReferred by: ${referrer.name} (${referrer.id})` : ''}`, { label: 'Open admin console', url: `${config.appUrl}/admin` });
 
   const expiresAt = issueUserSession(res, user.id, remember !== false);
-  res.json({ user: publicUser(user), expiresAt });
+  res.json({ user: publicUser(user), expiresAt, requiresEmailVerification: true });
 });
 
 // ---------- Login: password -> emailed one-time code -> session ----------
