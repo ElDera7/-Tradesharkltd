@@ -40,7 +40,7 @@ export const ForgotPasswordPage: React.FC = () => {
       }}>
         <div className="relative">
           <Mail className="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" className={inputCls} />
+          <input type="text" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com or Account ID (USR-...)" className={inputCls} />
         </div>
         {state.text && <Alert ok={state.ok} text={state.text} />}
         <button disabled={state.busy} className="w-full py-3 rounded-full bg-[#6dff8a] text-[#15170f] font-bold disabled:opacity-60">{state.busy ? 'Sending...' : 'Send reset link'}</button>

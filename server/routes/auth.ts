@@ -274,19 +274,23 @@ authRouter.get('/me', (req, res) => {
 });
 
 authRouter.post('/forgot-password', rateLimit('forgot', 5, 900), async (req, res) => {
-  const user = findUserByEmail(String(req.body?.email || ''));
+  const raw = String(req.body?.email || req.body?.identifier || '').trim();
+  const user = raw ? (findUserByLogin(raw) || findUserByEmail(raw)) : null;
   if (user) {
-    const token = await createToken('reset', user.id, 1);
+    const token = await createToken('reset', user.id, 2);
+    const origin = (req.get('origin') || req.headers.origin || config.appUrl || '').toString().replace(/\/+$/, '');
+    const resetUrl = `${origin || config.appUrl}/reset-password?token=${token}`;
     queueMail({
       to: user.email,
       subject: `Reset your ${config.brand.appName} password`,
-      fromName: 'Security',
-      text: `Hi ${user.name},\n\nWe received a request to reset the password for your account. Click the button below to choose a new password. This link expires in 1 hour.\n\nIf you did not request this, you can safely ignore this email - your password will not change.`,
-      cta: { label: 'Reset password', url: `${config.appUrl}/reset-password?token=${token}` },
+      fromName: 'Security Desk',
+      text: `Hi ${user.name},\n\nWe received a request to reset the password for your ${config.brand.appName} trading account (${user.id}). Click the button below to choose a new password. This link expires in 2 hours.\n\nIf you did not request this, you can safely ignore this email - your password will not change.`,
+      cta: { label: 'Reset Password', url: resetUrl },
     });
+    await audit(user.id, 'Password Reset Requested', `Password reset link dispatched to ${user.email} from IP ${clientIp(req)}.`, 'USER_MGMT');
   }
   // Always respond the same way to avoid revealing which emails are registered.
-  res.json({ ok: true, message: 'If an account exists for that email, a password reset link has been sent.' });
+  res.json({ ok: true, message: 'If an account exists for that email, a password reset link has been sent. Please check your inbox and spam folder.' });
 });
 
 authRouter.post('/reset-password', rateLimit('reset', 10, 900), async (req, res) => {

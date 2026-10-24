@@ -18,7 +18,7 @@ interface AuthModalProps {
 
 export const AuthModal: React.FC<AuthModalProps> = (props) => (props.isOpen ? <AuthModalInner {...props} /> : null);
 
-type Step = 'form' | 'loginOtp' | 'emailVerify' | 'kycPrompt';
+type Step = 'form' | 'loginOtp' | 'emailVerify' | 'kycPrompt' | 'forgotPassword';
 
 interface SignupChallenge {
   challengeId: string;
@@ -31,7 +31,7 @@ const AuthModalInner: React.FC<AuthModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { loginUser, registerUser, config, sendSignupVerifyCode, verifySignupCode } = useBrokerage();
+  const { loginUser, registerUser, config, sendSignupVerifyCode, verifySignupCode, requestPasswordReset } = useBrokerage();
 
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [step, setStep] = useState<Step>('form');
@@ -43,6 +43,10 @@ const AuthModalInner: React.FC<AuthModalProps> = ({
   const [agreed, setAgreed] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // forgot password in-modal state
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotStatus, setForgotStatus] = useState<{ ok?: boolean; text?: string; busy?: boolean } | null>(null);
 
   // login OTP
   const [loginOtp, setLoginOtp] = useState<LoginChallenge | null>(null);
@@ -352,6 +356,87 @@ const AuthModalInner: React.FC<AuthModalProps> = ({
               </div>
             </div>
 
+          /* FORGOT PASSWORD STEP */
+          ) : step === 'forgotPassword' ? (
+            <div className="space-y-5 animate-fadeIn">
+              <div className="space-y-1.5">
+                <TradeSharkLogo size="sm" showLtd={true} className="mb-2" />
+                <h3 className="text-xl sm:text-2xl font-bold text-white">Reset your password</h3>
+                <p className="text-xs text-[#a3a89e]">
+                  Enter your registered account email or User ID, and we'll dispatch a secure reset link.
+                </p>
+              </div>
+
+              {forgotStatus?.text && (
+                <div className={`p-3 rounded-xl text-xs flex items-start gap-2.5 ${forgotStatus.ok ? 'bg-[#6dff8a]/10 border border-[#6dff8a]/30 text-[#6dff8a]' : 'bg-red-500/15 border border-red-500/30 text-red-400'}`}>
+                  {forgotStatus.ok ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+                  <span>{forgotStatus.text}</span>
+                </div>
+              )}
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!forgotEmail) return;
+                  setForgotStatus({ busy: true });
+                  try {
+                    const msg = await requestPasswordReset(forgotEmail);
+                    setForgotStatus({ ok: true, text: msg || 'A password reset link has been dispatched to your email. Please check your inbox and spam folder.' });
+                  } catch (err) {
+                    setForgotStatus({ ok: false, text: errMsg(err) });
+                  }
+                }}
+                className="space-y-3.5"
+              >
+                <div className="space-y-1">
+                  <label className="text-xs text-white/70">Email or Account ID</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-white/40 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      required
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      placeholder="you@example.com or USR-..."
+                      className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#6dff8a] transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={forgotStatus?.busy}
+                  className="w-full py-3 rounded-xl bg-[#6dff8a] hover:bg-[#5ce077] text-[#15170f] font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(109,255,138,0.2)] transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {forgotStatus?.busy ? (
+                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <span>Send Password Reset Link</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="pt-2 text-center border-t border-white/10 flex items-center justify-between text-xs">
+                <button
+                  type="button"
+                  onClick={() => { setStep('form'); setMode('login'); setErrorMessage(null); }}
+                  className="text-[#6dff8a] hover:underline"
+                >
+                  ← Return to Log in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { onClose(); navigate('/forgot-password'); }}
+                  className="text-white/40 hover:text-white/70"
+                >
+                  Open full page ↗
+                </button>
+              </div>
+            </div>
+
           /* MAIN FORM */
           ) : (
             <div className="space-y-5">
@@ -442,7 +527,11 @@ const AuthModalInner: React.FC<AuthModalProps> = ({
                 {mode === 'login' && (
                   <button
                     type="button"
-                    onClick={() => { onClose(); navigate('/forgot-password'); }}
+                    onClick={() => {
+                      setForgotEmail(email);
+                      setForgotStatus(null);
+                      setStep('forgotPassword');
+                    }}
                     className="text-xs text-[#6dff8a] hover:underline"
                   >
                     Forgot password?

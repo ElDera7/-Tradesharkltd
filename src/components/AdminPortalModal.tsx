@@ -36,7 +36,8 @@ import {
   Server,
   Sparkles,
   LogOut,
-  Clock
+  Clock,
+  Menu
 } from 'lucide-react';
 import { TradeSharkLogo } from './TradeSharkLogo';
 import { useBrokerage } from '../context/BrokerageContext';
@@ -100,6 +101,7 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
   } = useBrokerage();
 
   const [activeTab, setActiveTab] = useState<AdminTab>(() => (ADMIN_TABS.includes(initialTab as AdminTab) ? initialTab as AdminTab : 'overview'));
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | AccountStatus>('ALL');
@@ -300,52 +302,93 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
       <div 
-        className="w-full max-w-7xl h-[94vh] bg-[#10120a] border border-[#6dff8a]/40 rounded-3xl shadow-2xl flex overflow-hidden text-left"
+        className="w-full max-w-7xl h-full sm:h-[94vh] bg-[#10120a] border-0 sm:border border-[#6dff8a]/40 rounded-none sm:rounded-3xl shadow-2xl flex overflow-hidden text-left relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Dedicated Admin Sidebar */}
-        <AdminSidebar
-          activeTab={activeTab}
-          onSelectTab={setActiveTab}
-          pendingKycCount={pendingKycCount}
-          pendingFundingCount={pendingFundingCount}
-          unreadInquiriesCount={unreadInquiriesCount}
-          usersCount={users.length}
-          adminSession={adminSession}
-          onLogout={() => handleLogout(false)}
-          onSwitchToUserPortal={onSwitchToUserDashboard}
-          onClose={onClose}
-        />
+        {/* Mobile Sidebar Off-Canvas Drawer (md:hidden) */}
+        {mobileMenuOpen && (
+          <div 
+            className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm md:hidden flex animate-fadeIn"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div 
+              className="w-72 max-w-[85vw] h-full bg-[#12140c] shadow-2xl relative flex flex-col"
+              onClick={e => e.stopPropagation()}
+            >
+              <AdminSidebar
+                activeTab={activeTab}
+                onSelectTab={setActiveTab}
+                pendingKycCount={pendingKycCount}
+                pendingFundingCount={pendingFundingCount}
+                unreadInquiriesCount={unreadInquiriesCount}
+                usersCount={users.length}
+                adminSession={adminSession}
+                onLogout={() => handleLogout(false)}
+                onSwitchToUserPortal={onSwitchToUserDashboard}
+                onClose={onClose}
+                onCloseDrawer={() => setMobileMenuOpen(false)}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Dedicated Desktop Sidebar (hidden on mobile, flex on desktop) */}
+        <div className="hidden md:flex shrink-0 w-64 sm:w-72 h-full">
+          <AdminSidebar
+            activeTab={activeTab}
+            onSelectTab={setActiveTab}
+            pendingKycCount={pendingKycCount}
+            pendingFundingCount={pendingFundingCount}
+            unreadInquiriesCount={unreadInquiriesCount}
+            usersCount={users.length}
+            adminSession={adminSession}
+            onLogout={() => handleLogout(false)}
+            onSwitchToUserPortal={onSwitchToUserDashboard}
+            onClose={onClose}
+          />
+        </div>
 
         {/* Right Main Body Content */}
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#10120a]">
           {/* Top Notification Toast */}
           {notification && (
-            <div className="bg-[#1b2b18] border-b border-[#6dff8a]/40 text-white px-4 py-2.5 text-xs text-center flex items-center justify-center gap-2 animate-fadeIn">
+            <div className="bg-[#1b2b18] border-b border-[#6dff8a]/40 text-white px-4 py-2 text-xs text-center flex items-center justify-center gap-2 animate-fadeIn shrink-0">
               <span className="w-2 h-2 rounded-full bg-[#6dff8a] animate-ping" />
               <span className="font-semibold">{notification}</span>
             </div>
           )}
 
           {/* Header Bar */}
-          <div className="p-4 sm:p-5 border-b border-white/10 bg-[#161a0f] flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-bold text-white">
-                  {tabTitles[activeTab]?.title || 'Back-Office & User Control Suite'}
-                </h2>
-                <span className="text-[10px] bg-yellow-400 text-black font-mono px-2 py-0.5 rounded font-bold uppercase">
-                  /#admin
-                </span>
+          <div className="p-3 sm:p-4 md:p-5 border-b border-white/10 bg-[#161a0f] flex items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              {/* Hamburger Button on Mobile */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-white/10 hover:bg-white/15 text-[#6dff8a] border border-white/15 transition-colors shrink-0"
+                title="Open navigation menu"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base md:text-lg font-bold text-white truncate">
+                    {tabTitles[activeTab]?.title || 'Back-Office & User Control Suite'}
+                  </h2>
+                  <span className="hidden sm:inline-block text-[10px] bg-yellow-400 text-black font-mono px-2 py-0.5 rounded font-bold uppercase shrink-0">
+                    /#admin
+                  </span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-[#a3a89e] truncate">
+                  {tabTitles[activeTab]?.subtitle || 'TradeShark Super-Admin Terminal'}
+                </p>
               </div>
-              <p className="text-xs text-[#a3a89e]">
-                {tabTitles[activeTab]?.subtitle || 'TradeShark Super-Admin Terminal'}
-              </p>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
               {/* Operator Badge */}
               <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs">
                 <span className="w-2 h-2 rounded-full bg-[#6dff8a] animate-pulse" />
@@ -390,16 +433,16 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
               {/* Quick Provision Account Button */}
               <button
                 onClick={() => setActiveTab('setup')}
-                className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl bg-[#6dff8a] text-[#15170f] text-xs font-bold hover:bg-[#5ce077] transition-colors shadow-sm"
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-xl bg-[#6dff8a] text-[#15170f] text-xs font-bold hover:bg-[#5ce077] transition-colors shadow-sm"
               >
                 <UserPlus className="w-3.5 h-3.5" />
-                <span>+ Setup User</span>
+                <span className="hidden sm:inline">+ Setup User</span>
               </button>
 
               {/* Sign Out / Lock Button */}
               <button
                 onClick={() => handleLogout(false)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 text-xs font-semibold transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 text-xs font-semibold transition-colors"
                 title="Sign out & lock administrative terminal"
               >
                 <LogOut className="w-3.5 h-3.5" />
@@ -408,7 +451,7 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
 
               <button
                 onClick={onClose}
-                className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                className="p-1.5 sm:p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -416,8 +459,8 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
           </div>
 
           {/* System Telemetry & Pending Queues Ribbon */}
-          <div className="px-6 py-2.5 bg-[#14160d] border-b border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-4 text-white/70">
+          <div className="px-3 sm:px-6 py-2 bg-[#14160d] border-b border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0">
+            <div className="flex items-center gap-2 sm:gap-4 text-white/70 flex-wrap">
               <span className="flex items-center gap-1.5 text-[#6dff8a]">
                 <span className="w-2 h-2 rounded-full bg-[#6dff8a] animate-pulse" />
                 Engine: LD4 London (1.2ms)
@@ -425,7 +468,7 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
               <span className="hidden sm:inline text-white/40">|</span>
               <span className="hidden sm:inline">Total Client Funds: <strong className="text-white">$842,610,940</strong></span>
               <span className="hidden md:inline text-white/40">|</span>
-              <span className="hidden md:inline">Registered Accounts: <strong className="text-white">{users.length}</strong></span>
+              <span className="text-white/60">Accounts: <strong className="text-white">{users.length}</strong></span>
             </div>
 
             <div className="flex items-center gap-3">
@@ -878,7 +921,8 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
                 </div>
 
                 <div className="border border-white/10 rounded-2xl overflow-hidden bg-black/20">
-                  <table className="w-full text-left text-xs">
+                  <div className="overflow-x-auto no-scrollbar">
+                    <table className="w-full min-w-[760px] text-left text-xs whitespace-nowrap">
                     <thead className="bg-[#181b11] text-white/50 uppercase border-b border-white/10 font-mono text-[10px]">
                       <tr>
                         <th className="p-3.5">Ref / Date</th>
@@ -966,7 +1010,8 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1301,7 +1346,8 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
               </div>
 
               <div className="border border-white/10 rounded-2xl overflow-hidden bg-black/20">
-                <table className="w-full text-left text-xs">
+                <div className="overflow-x-auto no-scrollbar">
+                  <table className="w-full min-w-[640px] text-left text-xs whitespace-nowrap">
                   <thead className="bg-[#181b11] text-white/50 uppercase border-b border-white/10 font-mono text-[10px]">
                     <tr>
                       <th className="p-3.5">Asset</th>
@@ -1344,7 +1390,8 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -1401,7 +1448,7 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
       {/* ========================================================= */}
       {inspectingUser && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-2xl bg-[#171a10] border border-[#6dff8a]/40 rounded-3xl p-6 shadow-2xl space-y-5 text-left">
+          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-[#171a10] border border-[#6dff8a]/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-5 text-left">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#6dff8a]/20 border border-[#6dff8a]/40 flex items-center justify-center font-bold text-white text-sm">
@@ -1575,7 +1622,7 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
       {/* ========================================================= */}
       {balanceModalUser && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md bg-[#181b11] border border-[#6dff8a]/40 rounded-3xl p-6 shadow-2xl space-y-4 text-left">
+          <div className="w-full max-w-md max-h-[92vh] overflow-y-auto bg-[#181b11] border border-[#6dff8a]/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 text-left">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div>
                 <h3 className="text-base font-bold text-white">Manual Balance Adjustment</h3>
@@ -1653,7 +1700,7 @@ const AdminPortalInner: React.FC<AdminPortalModalProps> = ({
       {/* ========================================================= */}
       {kycActionModal && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md bg-[#181b11] border border-white/20 rounded-3xl p-6 shadow-2xl space-y-4 text-left">
+          <div className="w-full max-w-md max-h-[92vh] overflow-y-auto bg-[#181b11] border border-white/20 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 text-left">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div>
                 <h3 className="text-base font-bold text-white">

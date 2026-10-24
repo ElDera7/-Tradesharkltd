@@ -14,7 +14,8 @@ import {
   Home, 
   Eye,
   LogOut,
-  MessageSquare
+  MessageSquare,
+  X
 } from 'lucide-react';
 import { TradeSharkLogo } from '../TradeSharkLogo';
 import { AdminSession } from './AdminLoginGate';
@@ -32,6 +33,7 @@ interface AdminSidebarProps {
   onLogout?: () => void;
   onSwitchToUserPortal?: () => void;
   onClose: () => void;
+  onCloseDrawer?: () => void;
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -44,7 +46,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   adminSession,
   onLogout,
   onSwitchToUserPortal,
-  onClose
+  onClose,
+  onCloseDrawer
 }) => {
   const [copiedLink, setCopiedLink] = React.useState(false);
 
@@ -147,14 +150,26 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   }, {} as Record<string, typeof navItems>);
 
   return (
-    <aside className="w-64 sm:w-72 bg-[#12140c] border-r border-white/10 flex flex-col h-full select-none shrink-0">
+    <aside className="w-full h-full bg-[#12140c] border-r border-white/10 flex flex-col select-none">
       {/* Brand & Portal Type Header */}
       <div className="p-4 sm:p-5 border-b border-white/10">
         <div className="flex items-center justify-between">
           <TradeSharkLogo size="sm" showLtd={true} />
-          <span className="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 font-mono px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-            ADMIN DESK
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 font-mono px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+              ADMIN DESK
+            </span>
+            {onCloseDrawer && (
+              <button
+                type="button"
+                onClick={onCloseDrawer}
+                className="md:hidden p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                title="Close drawer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
         <div className="mt-2 text-xs text-white/50 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-[#6dff8a] animate-ping" />
@@ -198,7 +213,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               return (
                 <button
                   key={item.id}
-                  onClick={() => onSelectTab(item.id)}
+                  onClick={() => {
+                    onSelectTab(item.id);
+                    if (onCloseDrawer) onCloseDrawer();
+                  }}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all ${
                     isActive
                       ? 'bg-[#6dff8a]/15 text-[#6dff8a] border border-[#6dff8a]/30 font-bold shadow-sm'
